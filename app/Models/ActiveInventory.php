@@ -17,7 +17,14 @@ class ActiveInventory extends Model
         'block',
         'row',
         'tier',
-        'date_in'
+        'date_in',
+        'dwell_days'
+    ];
+
+    protected $dates = [
+        'date_in',
+        'created_at',
+        'updated_at'
     ];
 
     public function terminal()
@@ -28,5 +35,15 @@ class ActiveInventory extends Model
     public function container()
     {
         return $this->belongsTo(Container::class, 'container_number', 'container_number');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function shippingLine()
+    {
+        return $this->belongsTo(ShippingLine::class, 'shipping_line_id');
     }
 }

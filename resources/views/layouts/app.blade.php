@@ -68,6 +68,23 @@
                                 <p>Dashboard</p>
                             </a>
                         </li>
+                        @can('manage-users')
+                        <li class="nav-item">
+                            <a href="{{ route('users.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>User Management</p>
+                            </a>
+                        </li>
+                        @endcan
+
+                        @can('manage-containers')
+                        <li class="nav-item">
+                            <a href="{{ route('containers.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-boxes"></i>
+                                <p>Container Management</p>
+                            </a>
+                        </li>
+                        @endcan
                         <li class="nav-item">
                             <a href="{{ route('truck-in.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-truck-loading"></i>

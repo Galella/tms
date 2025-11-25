@@ -16,4 +16,9 @@ class Terminal extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    public function containers()
+    {
+        return $this->belongsToMany(Container::class, 'terminal_container', 'terminal_id', 'container_number');
+    }
 }

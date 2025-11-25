@@ -12,25 +12,9 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    <h5><i class="icon fas fa-check"></i> Success!</h5>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    <h5><i class="icon fas fa-ban"></i> Error!</h5>
-                    {{ session('error') }}
-                </div>
-            @endif
-
             <div class="card card-primary">
                 <div class="card-header">
-                    <h3 class="card-title">Enter Truck IN Details</h3>
+                    <h3 class="card-title">Record Truck IN Operation</h3>
                 </div>
                 <!-- /.card-header -->
                 <!-- form start -->
@@ -43,7 +27,7 @@
                                     <label for="terminal_id">Terminal *</label>
                                     <select class="form-control @error('terminal_id') is-invalid @enderror" id="terminal_id" name="terminal_id" required>
                                         <option value="">Select Terminal</option>
-                                        @foreach(Auth::user()->terminals as $terminal)
+                                        @foreach($terminals as $terminal)
                                             <option value="{{ $terminal->id }}" {{ old('terminal_id') == $terminal->id ? 'selected' : '' }}>
                                                 {{ $terminal->name }} ({{ $terminal->code }})
                                             </option>
@@ -59,26 +43,27 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="container_number">Container Number *</label>
-                                    <input type="text" class="form-control @error('container_number') is-invalid @enderror"
-                                           id="container_number" name="container_number"
-                                           placeholder="Enter container number (e.g., ABCD1234567)"
+                                    <input type="text" class="form-control @error('container_number') is-invalid @enderror" 
+                                           id="container_number" name="container_number" 
+                                           placeholder="Enter container number (e.g., ABCD1234567)" 
                                            value="{{ old('container_number') }}" required>
                                     @error('container_number')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
                                     @enderror
+                                    <small class="form-text text-muted">Must follow ISO 6346 format (3-letter owner code + category digit + 6 digits + check digit)</small>
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="truck_number">Truck Number *</label>
-                                    <input type="text" class="form-control @error('truck_number') is-invalid @enderror"
-                                           id="truck_number" name="truck_number"
-                                           placeholder="Enter truck number"
+                                    <input type="text" class="form-control @error('truck_number') is-invalid @enderror" 
+                                           id="truck_number" name="truck_number" 
+                                           placeholder="Enter truck number" 
                                            value="{{ old('truck_number') }}" required>
                                     @error('truck_number')
                                         <span class="invalid-feedback" role="alert">
@@ -87,24 +72,6 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="container_type">Container Type *</label>
-                                    <select class="form-control @error('container_type') is-invalid @enderror" id="container_type" name="container_type" required>
-                                        <option value="">Select Container Type</option>
-                                        <option value="FULL" {{ old('container_type') == 'FULL' ? 'selected' : '' }}>FULL</option>
-                                        <option value="EMPTY" {{ old('container_type') == 'EMPTY' ? 'selected' : '' }}>EMPTY</option>
-                                    </select>
-                                    @error('container_type')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="operation_type">Operation Type *</label>
@@ -123,13 +90,20 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="customer_id">Customer</label>
-                                    <input type="number" class="form-control @error('customer_id') is-invalid @enderror"
-                                           id="customer_id" name="customer_id"
-                                           placeholder="Enter customer ID"
-                                           value="{{ old('customer_id') }}">
+                                    <select class="form-control @error('customer_id') is-invalid @enderror" id="customer_id" name="customer_id">
+                                        <option value="">Select Customer (for FULL containers)</option>
+                                        @foreach($customers as $customer)
+                                            <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                                {{ $customer->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     @error('customer_id')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -137,16 +111,17 @@
                                     @enderror
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="shipping_line_id">Shipping Line</label>
-                                    <input type="number" class="form-control @error('shipping_line_id') is-invalid @enderror"
-                                           id="shipping_line_id" name="shipping_line_id"
-                                           placeholder="Enter shipping line ID"
-                                           value="{{ old('shipping_line_id') }}">
+                                    <select class="form-control @error('shipping_line_id') is-invalid @enderror" id="shipping_line_id" name="shipping_line_id">
+                                        <option value="">Select Shipping Line (for EMPTY containers)</option>
+                                        @foreach($shippingLines as $line)
+                                            <option value="{{ $line->id }}" {{ old('shipping_line_id') == $line->id ? 'selected' : '' }}>
+                                                {{ $line->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     @error('shipping_line_id')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
@@ -154,14 +129,31 @@
                                     @enderror
                                 </div>
                             </div>
+                        </div>
+                        
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="driver_name">Driver Name</label>
-                                    <input type="text" class="form-control @error('driver_name') is-invalid @enderror"
-                                           id="driver_name" name="driver_name"
-                                           placeholder="Enter driver name"
-                                           value="{{ old('driver_name') }}">
-                                    @error('driver_name')
+                                    <label for="container_type">Container Type *</label>
+                                    <select class="form-control @error('container_type') is-invalid @enderror" id="container_type" name="container_type" required>
+                                        <option value="">Select Container Type</option>
+                                        <option value="FULL" {{ old('container_type') == 'FULL' ? 'selected' : '' }}>FULL</option>
+                                        <option value="EMPTY" {{ old('container_type') == 'EMPTY' ? 'selected' : '' }}>EMPTY</option>
+                                    </select>
+                                    @error('container_type')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="movement_time">Movement Time *</label>
+                                    <input type="datetime-local" class="form-control @error('movement_time') is-invalid @enderror" 
+                                           id="movement_time" name="movement_time" 
+                                           value="{{ old('movement_time', now()->format('Y-m-d\TH:i')) }}" required>
+                                    @error('movement_time')
                                         <span class="invalid-feedback" role="alert">
                                             <strong>{{ $message }}</strong>
                                         </span>
@@ -169,14 +161,14 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="block">Block *</label>
-                                    <input type="text" class="form-control @error('block') is-invalid @enderror"
-                                           id="block" name="block"
-                                           placeholder="Enter block"
+                                    <input type="text" class="form-control @error('block') is-invalid @enderror" 
+                                           id="block" name="block" 
+                                           placeholder="Enter block" 
                                            value="{{ old('block') }}" required>
                                     @error('block')
                                         <span class="invalid-feedback" role="alert">
@@ -188,9 +180,9 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="row">Row *</label>
-                                    <input type="text" class="form-control @error('row') is-invalid @enderror"
-                                           id="row" name="row"
-                                           placeholder="Enter row"
+                                    <input type="text" class="form-control @error('row') is-invalid @enderror" 
+                                           id="row" name="row" 
+                                           placeholder="Enter row" 
                                            value="{{ old('row') }}" required>
                                     @error('row')
                                         <span class="invalid-feedback" role="alert">
@@ -202,9 +194,9 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="tier">Tier *</label>
-                                    <input type="text" class="form-control @error('tier') is-invalid @enderror"
-                                           id="tier" name="tier"
-                                           placeholder="Enter tier"
+                                    <input type="text" class="form-control @error('tier') is-invalid @enderror" 
+                                           id="tier" name="tier" 
+                                           placeholder="Enter tier" 
                                            value="{{ old('tier') }}" required>
                                     @error('tier')
                                         <span class="invalid-feedback" role="alert">
@@ -214,14 +206,28 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
+                                    <label for="driver_name">Driver Name</label>
+                                    <input type="text" class="form-control @error('driver_name') is-invalid @enderror" 
+                                           id="driver_name" name="driver_name" 
+                                           placeholder="Enter driver name" 
+                                           value="{{ old('driver_name') }}">
+                                    @error('driver_name')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
                                     <label for="chassis_number">Chassis Number</label>
-                                    <input type="text" class="form-control @error('chassis_number') is-invalid @enderror"
-                                           id="chassis_number" name="chassis_number"
-                                           placeholder="Enter chassis number"
+                                    <input type="text" class="form-control @error('chassis_number') is-invalid @enderror" 
+                                           id="chassis_number" name="chassis_number" 
+                                           placeholder="Enter chassis number" 
                                            value="{{ old('chassis_number') }}">
                                     @error('chassis_number')
                                         <span class="invalid-feedback" role="alert">
@@ -230,27 +236,13 @@
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="seal_number">Seal Number</label>
-                                    <input type="text" class="form-control @error('seal_number') is-invalid @enderror"
-                                           id="seal_number" name="seal_number"
-                                           placeholder="Enter seal number"
-                                           value="{{ old('seal_number') }}">
-                                    @error('seal_number')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
-                            </div>
                         </div>
-
+                        
                         <div class="form-group">
                             <label for="remarks">Remarks</label>
-                            <textarea class="form-control @error('remarks') is-invalid @enderror"
-                                      id="remarks" name="remarks"
-                                      rows="3"
+                            <textarea class="form-control @error('remarks') is-invalid @enderror" 
+                                      id="remarks" name="remarks" 
+                                      rows="3" 
                                       placeholder="Enter remarks">{{ old('remarks') }}</textarea>
                             @error('remarks')
                                 <span class="invalid-feedback" role="alert">
